@@ -126,3 +126,46 @@ erDiagram
 - [05 تفاصيل الفاتورة](05-invoice-details-transdt-erd.md)
 - [06 السندات](06-vouchers-mstndat-erd.md)
 - [07 القيود اليومية](07-journal-yomia-erd.md)
+
+
+## تحديث معتمد — فصل رأس القيد عن أسطر اليومية
+
+**قرار التصميم:** نضيف جدول `JournalEntries` لرأس القيد، ونخصص `Yomia` لأسطره. هذا القسم هو الأحدث ويحل محل تصوير `Yomia` القديم في الرسم المبدئي أعلاه، إلى حين إعادة رسم النسخة الموحدة النهائية.
+
+```mermaid
+erDiagram
+    DocTyp ||--o{ JournalEntries : "document type"
+    JournalEntries ||--|{ Yomia : "journal lines"
+    Accounts ||--o{ Yomia : "account"
+    DocTyp {
+        INTEGER Typ PK
+        TEXT TypName
+    }
+    JournalEntries {
+        INTEGER JournalId PK
+        TEXT EntryDate
+        INTEGER Typ FK
+        INTEGER SourceId "conditional document reference"
+        TEXT PostingStatus "draft or posted"
+    }
+    Yomia {
+        INTEGER JournalId PK,FK "composite part 1"
+        INTEGER LineNo PK "composite part 2"
+        INTEGER AccountId FK
+        NUMERIC Debit
+        NUMERIC Credit
+    }
+    Accounts {
+        INTEGER AccountId PK
+        TEXT AccountName
+    }
+```
+
+- `JournalEntries.JournalId` مفتاح أساسي؛ `Yomia (JournalId, LineNo)` مفتاح أساسي مركب.
+- `JournalEntries.Typ → DocTyp.Typ`، و`Yomia.JournalId → JournalEntries.JournalId`، و`Yomia.AccountId → Accounts.AccountId`.
+- `SourceId + Typ` يحدد مصدر القيد (فاتورة من `Trans` أو سند من `Mstndat`)، لكنه **ليس مفتاحًا أجنبيًا مباشرًا**. يلزم تحقق ملائم حسب نوع المستند، مع معالجة خاصة للقيد اليدوي `Typ=7`.
+- **قاعدة عمل معتمدة:** عند ترحيل فاتورة محاسبيًا تُمنع التعديلات والحذف المباشر عليها؛ ويكون التصحيح عبر مرتجع أو إجراء عكسي مضبوط مع سجل تدقيق، وليس تغيير البيانات المرحّلة بصمت.
+- لا يرحّل أي قيد قبل التحقق من تساوي مجموع المدين والدائن، ومن وجود أسطر صالحة. يمكن الاحتفاظ بالقيود غير المكتملة كمسودات.
+- يجب تطبيق الترحيل وتغيير حالة المستند والقيود في معاملة واحدة، مع ضمان سلامة العلاقات.
+- لا نستخدم حذفًا متسلسلًا `ON DELETE CASCADE` لمسح قيود مالية مرحّلة.
+- **قيد التنفيذ:** هذا التحديث يعتمد سياسة العمل وهيكل اليومية، لكن تفاصيل ربط المصدر وقواعد SQLite النهائية ما زالت قيد التحليل.
