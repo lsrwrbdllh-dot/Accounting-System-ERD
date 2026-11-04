@@ -212,3 +212,81 @@ erDiagram
 ```
 
 > **ملاحظة:** الجداول الحالية لا تشمل بعدُ نموذج أرصدة وحركات المخزون؛ يجب استكماله قبل تنفيذ الترحيل الفعلي. هذا تحديث قرار وظيفي ومخطط مبدئي، وليس تطبيقًا مكتملًا.
+
+
+## تحديث المخزون المعتمد — InventoryMovements
+
+أُضيف جدول **حركات المخزون**، لتسجيل التغيرات الناتجة عن ترحيل الفواتير. هذا التصميم يخص مخزونًا واحدًا مبدئيًا؛ دعم المستودعات المتعددة يستلزم إضافة `WarehouseId` لاحقًا.
+
+### حقول الجدول
+
+| الحقل | الوظيفة |
+|---|---|
+| `MovementId` | المفتاح الأساسي للحركة، رقم مستقل |
+| `TransId` | رقم الفاتورة المصدر |
+| `Typ` | نوع الفاتورة المصدر |
+| `LineNo` | رقم سطر الفاتورة الذي ولّد الحركة |
+| `ItemId` | رقم الصنف |
+| `ItemUnitId` | وحدة الصنف المختارة في الفاتورة |
+| `QuantityChange` | التغير بوحدة الصنف الأساسية، موجب للدخول وسالب للخروج |
+| `MovementDate` | تاريخ ووقت تسجيل الحركة |
+
+### العلاقات
+
+```mermaid
+erDiagram
+    Trans ||--|{ TransDt : "invoice lines"
+    TransDt ||--o{ InventoryMovements : "generates on posting"
+    Stk_Item ||--o{ InventoryMovements : "item"
+    Stk_ItemUnit ||--o{ InventoryMovements : "item unit"
+    Trans {
+        INTEGER TransId PK
+        INTEGER Typ PK,FK
+        TEXT Status "Draft or Posted"
+    }
+    TransDt {
+        INTEGER TransId PK,FK
+        INTEGER Typ PK,FK
+        INTEGER LineNo PK
+        INTEGER ItemId FK
+        INTEGER ItemUnitId FK
+        NUMERIC Qty
+        NUMERIC Price
+    }
+    Stk_Item {
+        INTEGER ItemId PK
+        TEXT ItemName
+    }
+    Stk_ItemUnit {
+        INTEGER ItemUnitId PK
+        INTEGER ItemId FK
+        NUMERIC PackingQty
+    }
+    InventoryMovements {
+        INTEGER MovementId PK
+        INTEGER TransId FK "composite FK part 1"
+        INTEGER Typ FK "composite FK part 2"
+        INTEGER LineNo FK "composite FK part 3"
+        INTEGER ItemId FK
+        INTEGER ItemUnitId FK
+        INTEGER QuantityChange
+        TEXT MovementDate
+    }
+```
+
+**المفتاح الأساسي:** `MovementId`.
+
+**المفتاح الأجنبي المركب:** `(TransId, Typ, LineNo)` يشير إلى `TransDt(TransId, Typ, LineNo)`. يشير `ItemId` إلى `Stk_Item`، و`ItemUnitId` إلى `Stk_ItemUnit`. يجب فرض تطابق الصنف والوحدة مع تفاصيل الفاتورة (بقيد مركب مناسب أو مشغل تحقق)، وليس الاعتماد على المفاتيح المنفصلة وحدها.
+
+**حساب الكمية:** `QuantityChange = Qty × PackingQty × Direction` حيث `Direction` يساوي +1 لدخول المخزون و-1 لخروجه، حسب نوع المستند. مثال: 3 كراتين × 24 = **+72 حبة** عند شراء الكمية. في التطبيق، يفضل تخزين الكميات بوحدة أساسية دقيقة مناسبة للصنف؛ اختيار نوع `INTEGER` أو `NUMERIC` يعتمد على السماح بكسور الكميات.
+
+**قواعد العمل:**
+- لا تُنشأ حركات مخزون عند حفظ الفاتورة بحالة `Draft`.
+- عند الترحيل، تُنشأ حركات المخزون مع القيد المحاسبي وتغيير حالة الفاتورة في معاملة واحدة؛ في حال الخطأ يتم التراجع عن الجميع.
+- يجب منع إنشاء حركات مكررة عند إعادة طلب الترحيل.
+- لا تُحذف حركات الفواتير المرحّلة مباشرة؛ تستخدم حركات عكسية موثقة عند التصحيح.
+- يجب تحديد سياسات المرتجعات والكميات السالبة ودقة التعبئة قبل SQL النهائي.
+
+**قيد مهم:** المخطط أعلاه يرسم مسار الحركات الناتجة عن الفواتير فقط. إذا أُضيفت لاحقًا حركة جرد أو نقل مستودعات، يلزم توسيع مصدر الحركة بحيث لا يُفترض أن لكل حركة فاتورة.
+
+> هذا القسم تحديث للمخطط الشامل السابق. لم تُدمج جميع الأشكال القديمة في رسم واحد نهائي بعد، ولا تزال بعض تفاصيل الربط المالي ومصدر الحركات قيد الاعتماد.
