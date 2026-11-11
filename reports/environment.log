@@ -1,7 +1,0 @@
-python3: /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3
-java: /usr/bin/java
-flutter: NOT INSTALLED
-dart: NOT INSTALLED
-adb: NOT INSTALLED
-emulator: NOT INSTALLED
-/dev/kvm: False

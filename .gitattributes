@@ -1,6 +1,0 @@
-*.sql text eol=lf
-*.md text eol=lf
-*.json text eol=lf
-*.dart text eol=lf
-*.py text eol=lf
-*.jar -text
