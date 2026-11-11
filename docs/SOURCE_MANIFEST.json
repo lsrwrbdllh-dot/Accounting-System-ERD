@@ -1,0 +1,81 @@
+{
+  "repository": "lsrwrbdllh-dot/Accounting-System-ERD",
+  "commit": "8bf595847791a6f4c03eda27ec2b711dad07e8a6",
+  "files": [
+    {
+      "path": "database/TEST_REPORT.md",
+      "blob_sha1": "f13295d568cef37c1d543ee35b4c9f4055637ab4",
+      "bytes": 1276
+    },
+    {
+      "path": "database/schema.sql",
+      "blob_sha1": "0da36d57df40c94ea3f576b26d449b547595f421",
+      "bytes": 7529
+    },
+    {
+      "path": "docs/00-complete-accounting-erd.md",
+      "blob_sha1": "33d98ef0caa03aade997370d8bf66de8e5bbcc77",
+      "bytes": 15613
+    },
+    {
+      "path": "docs/01-items-units-erd.md",
+      "blob_sha1": "ddd2ca56a93a55664a6afb1852a0b6d89e6f2c17",
+      "bytes": 2099
+    },
+    {
+      "path": "docs/02-accounts-erd.md",
+      "blob_sha1": "a254101a327e0953d5c8be981a527f58ccd6a697",
+      "bytes": 3301
+    },
+    {
+      "path": "docs/03-document-types-erd.md",
+      "blob_sha1": "e28ca3565b2c6d089f952d6ca5edd5559ac2625f",
+      "bytes": 3120
+    },
+    {
+      "path": "docs/04-invoice-header-trans-erd.md",
+      "blob_sha1": "df78b1992d05dad515914fbaa2002c399a832ebb",
+      "bytes": 3016
+    },
+    {
+      "path": "docs/05-invoice-details-transdt-erd.md",
+      "blob_sha1": "218998fc944a23a79932f3b082665c537d624145",
+      "bytes": 4078
+    },
+    {
+      "path": "docs/06-vouchers-mstndat-erd.md",
+      "blob_sha1": "d287919a38f19699034e42d6643e61e5cdebc9d5",
+      "bytes": 2592
+    },
+    {
+      "path": "docs/07-journal-yomia-erd.md",
+      "blob_sha1": "99498ce79bb11fd8ce93e4277c63df47b7fd1c30",
+      "bytes": 3328
+    },
+    {
+      "path": "docs/08-master-data-complete-erd.md",
+      "blob_sha1": "db4a460feb62642b049fcaec803c6b37b9fc638f",
+      "bytes": 2336
+    },
+    {
+      "path": "docs/09-documents-ledger-complete-erd.md",
+      "blob_sha1": "5f2e960bd998e67daa8fb293cd4189ff69f9e10e",
+      "bytes": 3835
+    },
+    {
+      "path": "docs/10-inventory-complete-erd.md",
+      "blob_sha1": "9278679cb1f3e485b2477f657cfd62a6f546c760",
+      "bytes": 2510
+    },
+    {
+      "path": "docs/11-finance-security-complete-erd.md",
+      "blob_sha1": "bf016999b430e0298132eca1f01980a359aa8f63",
+      "bytes": 2809
+    },
+    {
+      "path": "docs/12-design-decisions-and-roadmap.md",
+      "blob_sha1": "f11336c72980f349164acf956f173edb30465c4e",
+      "bytes": 1753
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "executed_at_utc": "2026-11-11T23:14:40.043612+00:00",
+  "python": "3.12.14",
+  "sqlite": "3.53.1",
+  "sqlite_tests": {
+    "run": 58,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": true
+  },
+  "structure_check": {
+    "exit_code": 0,
+    "description": "Dart delimiters, Android XML, JSON and Gradle wrapper; not Dart compilation"
+  },
+  "tools": {
+    "flutter": null,
+    "dart": null,
+    "adb": null,
+    "emulator": null,
+    "java": "/usr/bin/java"
+  },
+  "kvm_present": false,
+  "flutter_analyze": "NOT RUN: Flutter SDK unavailable",
+  "flutter_tests": "NOT RUN: Flutter SDK unavailable",
+  "android_build": "NOT RUN: Flutter/Android SDK unavailable",
+  "android_emulator": "NOT RUN: emulator/adb/SDK unavailable",
+  "android_process_restart": "NOT RUN",
+  "github_ci": "NOT RUN in this session"
+}
