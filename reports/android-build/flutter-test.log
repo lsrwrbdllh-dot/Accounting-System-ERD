@@ -1,0 +1,8 @@
+00:00 +0: loading /home/runner/work/Accounting-System-ERD/Accounting-System-ERD/app/test/widget_test.dart
+00:00 +0: /home/runner/work/Accounting-System-ERD/Accounting-System-ERD/app/test/widget_test.dart: Arabic login uses the real database
+00:01 +1: /home/runner/work/Accounting-System-ERD/Accounting-System-ERD/app/test/repository_test.dart: repository posts atomically, rejects duplicates, persists after reopen
+00:01 +2: /home/runner/work/Accounting-System-ERD/Accounting-System-ERD/app/test/repository_test.dart: repository posts atomically, rejects duplicates, persists after reopen
+00:03 +3: /home/runner/work/Accounting-System-ERD/Accounting-System-ERD/app/test/repository_test.dart: repository refuses an unbalanced journal and rolls back late failure
+00:06 +4: /home/runner/work/Accounting-System-ERD/Accounting-System-ERD/app/test/repository_test.dart: production setup and role enforcement
+00:16 +5: /home/runner/work/Accounting-System-ERD/Accounting-System-ERD/app/test/repository_test.dart: fresh Android metadata does not block first migration
+00:19 +6: All tests passed!

@@ -2,7 +2,7 @@
 
 تنفيذ SQLite مع تطبيق Flutter عربي يعمل محليًا، ومحرك ترحيل واحد داخل SQL تستعمله اختبارات Python والتطبيق عبر `sqflite`. حُفظت مخططات `docs/00` إلى `docs/12` كما هي، بناءً على المصدر `8bf595847791a6f4c03eda27ec2b711dad07e8a6`.
 
-**الحالة الفعلية:** اجتازت اختبارات SQLite التشغيل المحلي. كود Flutter وهيكل Android والاختبارات مضافة، لكن تحليل Dart وبناء APK واختبارات Flutter وتشغيل Android لم تنفذ في هذه البيئة لغياب Flutter SDK وAndroid SDK والمحاكي. انظر [التقرير الفعلي](database/TEST_REPORT.md) و[نتائج التنفيذ](reports/results.json).
+**تحديث 2026-11-12:** نجح بناء APK عبر GitHub Actions باستخدام Flutter 3.38.0، واجتاز التحليل و6 اختبارات Flutter و58 اختبار SQLite. [تقرير البناء وروابط التنزيل](reports/ANDROID_BUILD_REPORT.md). لم يُشغّل التطبيق على هاتف أو محاكي Android فعليًا. تقارير SQLite الأصلية مؤرخة قبل هذا البناء وتبقى محفوظة كسجل تاريخي.
 
 ## تشغيل قاعدة البيانات والاختبارات الآن
 
@@ -62,7 +62,7 @@ flutter run --dart-define=APP_ENV=production -d emulator-5554
 flutter build apk --debug --dart-define=APP_ENV=demo
 ```
 
-المسار المتوقع `app/build/app/outputs/flutter-apk/app-debug.apk`. لم يُنتج APK في البيئة الحالية. إعداد release الحالي يستخدم مفتاح debug كما في قالب Flutter؛ يلزم إعداد توقيع إصدار مملوك قبل نشر التطبيق. لم يُنشأ `pubspec.lock` لأن حل الحزم لم ينفذ؛ أنشئه بواسطة `flutter pub get` واحفظه عند التحقق من البناء.
+المسار الناتج `app/build/app/outputs/flutter-apk/app-debug.apk`. بُني APK بنجاح على GitHub Actions، ورابط تنزيله في [تقرير البناء](reports/ANDROID_BUILD_REPORT.md). إعداد release الحالي يستخدم مفتاح debug كما في قالب Flutter؛ يلزم إعداد توقيع إصدار مملوك قبل النشر الرسمي. ملف `pubspec.lock` محفوظ من عملية البناء الناجحة لتثبيت إصدارات الحزم المستخدمة.
 
 ## تجربة الشاشات واستمرار الحفظ
 
@@ -114,4 +114,4 @@ python3 tools/verify.py
 
 النسخة القديمة غير المرقمة محفوظة في `database/legacy`. لا توجد قاعدة مستخدم قديمة في المستودع. عند اكتشاف قاعدة غير مرقمة يرفض runner فتحها كتحديث دون مساس ببياناتها؛ تحويلها يحتاج نسخًا احتياطيًا ومطابقة الأرصدة ووحدات القياس، ولم يُدّع تنفيذ محوّل تلقائي لها.
 
-راجع [مراجعة التصميم](docs/IMPLEMENTATION_REVIEW.md)، و[قائمة التسليم](docs/DELIVERY.md)، و[التقرير](database/TEST_REPORT.md). توجد CI لـPython وFlutter في `.github/workflows/verify.yml`؛ لم تشغّل على GitHub في هذه الجلسة.
+راجع [مراجعة التصميم](docs/IMPLEMENTATION_REVIEW.md)، و[قائمة التسليم الأصلية](docs/DELIVERY.md)، و[تقرير SQLite التاريخي](database/TEST_REPORT.md)، و[تقرير بناء Android الأحدث](reports/ANDROID_BUILD_REPORT.md). اجتازت CI في `.github/workflows/verify.yml` اختبارات Python وFlutter والتحليل وبناء APK على GitHub.
