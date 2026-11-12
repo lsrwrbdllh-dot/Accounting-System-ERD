@@ -23,7 +23,7 @@ String errorMessage(Object error) {
   };
   for (final entry in messages.entries) { if (text.contains(entry.key)) { return entry.value; } }
   if (error is FormatException) { return error.message; }
-  if (error is StateError) { return '${error.message}'; }
+  if (error is StateError) { return error.message; }
   return 'تعذر إتمام العملية. راجع البيانات ثم أعد المحاولة.';
 }
 

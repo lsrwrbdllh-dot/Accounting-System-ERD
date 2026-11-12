@@ -55,7 +55,8 @@ class _InvoiceEditorState extends State<InvoiceEditor>{
       final DbRow? line;
       if(returning){final source=await widget.repository.invoiceLines(original!,originalTyp);if(!mounted){return;}line=await returnLineDialog(context,source,existing:index==null?null:lines[index]);}
       else{line=await invoiceLineDialog(context,widget.repository,existing:index==null?null:lines[index]);}
-      if(line!=null&&mounted){setState((){if(index==null){lines.add(line);}else{lines[index]=line;}});}
+      final selectedLine=line;
+      if(selectedLine!=null&&mounted){setState((){if(index==null){lines.add(selectedLine);}else{lines[index]=selectedLine;}});}
     }catch(e){if(mounted){showError(context,e);}}
   }
   Future<void> save()async{
