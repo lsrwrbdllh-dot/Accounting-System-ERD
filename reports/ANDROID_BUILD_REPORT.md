@@ -1,4 +1,6 @@
-# نتيجة بناء Android — 2026-11-12
+# نتيجة بناء Android الأول — سجل تاريخي
+
+**هذه نتيجة إصدار سابق.** النسخة الأحدث اجتازت اختبار محاكي Android وتُنشر مباشرة بصيغة APK؛ راجع [تقرير الإصلاح والتثبيت](ANDROID_INSTALLATION_REPORT.md).
 
 المستودع `lsrwrbdllh-dot/Accounting-System-ERD`، فرع `implementation/sqlite-flutter`.
 

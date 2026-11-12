@@ -2,7 +2,7 @@
 
 تنفيذ SQLite مع تطبيق Flutter عربي يعمل محليًا، ومحرك ترحيل واحد داخل SQL تستعمله اختبارات Python والتطبيق عبر `sqflite`. حُفظت مخططات `docs/00` إلى `docs/12` كما هي، بناءً على المصدر `8bf595847791a6f4c03eda27ec2b711dad07e8a6`.
 
-**تحديث 2026-11-12:** نجح بناء APK عبر GitHub Actions باستخدام Flutter 3.38.0، واجتاز التحليل و6 اختبارات Flutter و58 اختبار SQLite. [تقرير البناء وروابط التنزيل](reports/ANDROID_BUILD_REPORT.md). لم يُشغّل التطبيق على هاتف أو محاكي Android فعليًا. تقارير SQLite الأصلية مؤرخة قبل هذا البناء وتبقى محفوظة كسجل تاريخي.
+**تحديث 2026-11-12:** نجح التحليل و8 اختبارات Flutter و58 اختبار SQLite واختبارا Android، ثم بناء APK وتثبيته وتشغيله وإعادة تشغيله على محاكي Android 13. [تنزيل APK مباشرة](https://github.com/lsrwrbdllh-dot/Accounting-System-ERD/releases/download/android-preview-15-d679c1efdec73eed7e104103eccdb23187e049dc/Accounting-System-Android.apk) — [تقرير الإصلاح والتثبيت](reports/ANDROID_INSTALLATION_REPORT.md). النسخة Preview ببيانات تجربة وتوقيع اختبار؛ لم تُجرب على Redmi 12 فعليًا.
 
 ## تشغيل قاعدة البيانات والاختبارات الآن
 
@@ -31,7 +31,7 @@ sqlite3 accounting_production.db < database/schema.sql
 ## تشغيل تطبيق Android خارج البيئة الحالية
 
 1. ثبّت Flutter **3.38.0** وAndroid Studio، مع Android SDK وCommand-line Tools وPlatform Tools. استخدم JDK 17 المتوافق مع إعدادات المشروع، وثبّت منصات SDK التي يطلبها `flutter doctor` والبناء.
-2. أنشئ جهازًا افتراضيًا من Android Studio Device Manager وشغّله، أو صِل هاتفًا حقيقيًا مع USB debugging. التطبيق يستهدف Android 6 / API 23 فأعلى.
+2. أنشئ جهازًا افتراضيًا من Android Studio Device Manager وشغّله، أو صِل هاتفًا حقيقيًا مع USB debugging. APK المبني بـFlutter 3.38 يتطلب Android 7 / API 24 فأعلى، كما تؤكد معلومات الحزمة الفعلية؛ ترفع أداة Flutter القيمة 23 الموجودة في مصدر Gradle أثناء البناء.
 3. من جذر المستودع، نفّذ:
 
 ```bash
@@ -62,7 +62,7 @@ flutter run --dart-define=APP_ENV=production -d emulator-5554
 flutter build apk --debug --dart-define=APP_ENV=demo
 ```
 
-المسار الناتج `app/build/app/outputs/flutter-apk/app-debug.apk`. بُني APK بنجاح على GitHub Actions، ورابط تنزيله في [تقرير البناء](reports/ANDROID_BUILD_REPORT.md). إعداد release الحالي يستخدم مفتاح debug كما في قالب Flutter؛ يلزم إعداد توقيع إصدار مملوك قبل النشر الرسمي. ملف `pubspec.lock` محفوظ من عملية البناء الناجحة لتثبيت إصدارات الحزم المستخدمة.
+المسار الناتج `app/build/app/outputs/flutter-apk/app-debug.apk`، وحزمة Debug هي `com.accounting.system.diagnostic`. رابط التنزيل أعلاه يوزع APK مبنيًا بوضع Release، بحزمة `com.accounting.system.preview` واسم «النظام المحاسبي - تجربة». يُبنى باستخدام `flutter build apk --release --dart-define=APP_ENV=demo` ثم يوجد في `app/build/app/outputs/flutter-apk/app-release.apk`. النسخة موقعة بمفتاح اختبار؛ يلزم مفتاح مملوك محفوظ في GitHub Secrets قبل الإنتاج وضمان التحديثات المستقبلية دون تعارض توقيع. لا تحذف نسخة تحتوي بيانات لمعالجة تعارض توقيع. ملف `pubspec.lock` مطابق للحزم المستخدمة في التحقق الناجح.
 
 ## تجربة الشاشات واستمرار الحفظ
 
@@ -76,15 +76,15 @@ flutter build apk --debug --dart-define=APP_ENV=demo
 flutter test integration_test/persistence_test.dart -d emulator-5554
 ```
 
-يتحقق من الإضافة والقراءة وتعديل المسودة والترحيل وإغلاق اتصال SQLite وإعادة فتحه. لا يدّعي هذا الاختبار وحده قتل عملية التطبيق. لاختبار إيقاف التطبيق فعليًا، احفظ مسودة برقم معروف، ثم:
+اجتاز الاختباران المحاكي: القراءة وتعديل المسودة والترحيل وإعادة فتح SQLite، ثم الدخول وحفظ فاتورة مشتريات وترحيلها ومراجعة المخزون عبر الواجهة. فحصت CI أيضًا تثبيت APK بوضع Release وإيقاف عمليته وإعادة إطلاقها، مع لقطة شاشة للدخول. للتحقق يدويًا من بقاء فاتورة بين عمليتين منفصلتين، احفظ مسودة برقم معروف، ثم:
 
 ```bash
-adb shell am force-stop com.accounting.system
-adb shell monkey -p com.accounting.system 1
+adb shell am force-stop com.accounting.system.preview
+adb shell monkey -p com.accounting.system.preview 1
 adb logcat -d -s flutter AndroidRuntime
 ```
 
-سجّل الدخول وتحقق من بقاء المسودة والتعديل ورصيد المخزون. هذا الفحص اليدوي **لم ينفذ هنا**.
+سجّل الدخول وتحقق من بقاء المسودة والتعديل ورصيد المخزون. فحص بقاء فاتورة بين عمليتين منفصلتين **لم ينفذ هنا**؛ اختبار الحفظ الآلي يفتح اتصال SQLite من جديد. استعمل `.diagnostic` بدل `.preview` عند تشغيل نسخة Debug.
 
 ## قواعد المحاسبة
 
@@ -114,4 +114,4 @@ python3 tools/verify.py
 
 النسخة القديمة غير المرقمة محفوظة في `database/legacy`. لا توجد قاعدة مستخدم قديمة في المستودع. عند اكتشاف قاعدة غير مرقمة يرفض runner فتحها كتحديث دون مساس ببياناتها؛ تحويلها يحتاج نسخًا احتياطيًا ومطابقة الأرصدة ووحدات القياس، ولم يُدّع تنفيذ محوّل تلقائي لها.
 
-راجع [مراجعة التصميم](docs/IMPLEMENTATION_REVIEW.md)، و[قائمة التسليم الأصلية](docs/DELIVERY.md)، و[تقرير SQLite التاريخي](database/TEST_REPORT.md)، و[تقرير بناء Android الأحدث](reports/ANDROID_BUILD_REPORT.md). اجتازت CI في `.github/workflows/verify.yml` اختبارات Python وFlutter والتحليل وبناء APK على GitHub.
+راجع [مراجعة التصميم](docs/IMPLEMENTATION_REVIEW.md)، و[قائمة التسليم الأصلية](docs/DELIVERY.md)، و[تقرير SQLite التاريخي](database/TEST_REPORT.md)، و[تقرير تثبيت Android الأحدث](reports/ANDROID_INSTALLATION_REPORT.md). اجتازت CI في `.github/workflows/verify.yml` اختبارات Python وFlutter والتحليل وبناء APK على GitHub.

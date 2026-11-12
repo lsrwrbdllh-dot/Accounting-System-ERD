@@ -1,0 +1,47 @@
+{
+  "repository": "lsrwrbdllh-dot/Accounting-System-ERD",
+  "branch": "implementation/sqlite-flutter",
+  "commit": "d679c1efdec73eed7e104103eccdb23187e049dc",
+  "workflow_run_id": 43297879442,
+  "workflow_conclusion": "success",
+  "completed_at_utc": "2026-11-12T20:21:51Z",
+  "flutter_version": "3.38.0",
+  "flutter_analyze": "No issues found",
+  "flutter_tests_passed": 8,
+  "sqlite_tests_passed": 58,
+  "android_integration_tests_passed": 2,
+  "android_api": 33,
+  "android_version": "13",
+  "device": "GitHub Actions x86_64 Android emulator",
+  "physical_redmi_tested": false,
+  "apk": {
+    "url": "https://github.com/lsrwrbdllh-dot/Accounting-System-ERD/releases/download/android-preview-15-d679c1efdec73eed7e104103eccdb23187e049dc/Accounting-System-Android.apk",
+    "size_bytes": 50738282,
+    "sha256": "a419ab5d1260e30226636d5b7abe391ef040762b525d5b6e0bd592b3524dbc0a",
+    "package": "com.accounting.system.preview",
+    "version_name": "1.0.1-preview",
+    "version_code": 2,
+    "minimum_android_api": 24,
+    "target_android_api": 36,
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "build_mode": "release",
+    "signature_scheme": "v2",
+    "signing": "Android debug certificate; preview only",
+    "debuggable": false,
+    "test_only": false,
+    "adb_install": "Success",
+    "launch": "ok",
+    "force_stop_and_relaunch": "ok"
+  },
+  "artifacts": {
+    "native_evidence": 13981401087,
+    "release_apk": 13981051484,
+    "flutter_results": 13980985943,
+    "sqlite_results": 13979029564
+  },
+  "persistence_scope": "Native SQLite close/reopen verified with saved invoice; process force-stop/relaunch verifies startup only."
+}

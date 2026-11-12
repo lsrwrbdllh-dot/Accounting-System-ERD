@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.accounting.system.preview/com.accounting.system.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.accounting.system.preview/com.accounting.system.MainActivity
+TotalTime: 1580
+WaitTime: 1587
+Complete
