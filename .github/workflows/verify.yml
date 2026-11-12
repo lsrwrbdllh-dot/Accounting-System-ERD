@@ -34,7 +34,7 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.0'
+          flutter-version: '3.32.8'
           channel: stable
           cache: true
       - name: Inspect Flutter and Android toolchains
@@ -89,7 +89,7 @@ jobs:
         run: |
           test -s dist/Accounting-System-Android.apk
           printf 'نسخة تجربة موقعة للاختبار، مبنية من %s.\n\n' "$GITHUB_SHA" > dist/RELEASE_NOTES.md
-          printf 'نجح التحليل والاختبارات والتثبيت والتشغيل على محاكي Android 13.\n' >> dist/RELEASE_NOTES.md
+          printf 'minSdk 21: نجح التحليل والاختبارات والتثبيت والتشغيل على محاكي Android 5.0 وAndroid 13 بالملف نفسه.\n' >> dist/RELEASE_NOTES.md
           printf 'نزّل ملف APK نفسه؛ لا تغيّر امتداد ملف ZIP إلى APK.\n' >> dist/RELEASE_NOTES.md
           printf 'المستخدم: demo، كلمة المرور: Demo@2026!\n\n' >> dist/RELEASE_NOTES.md
           printf 'هذه نسخة Preview بتوقيع اختبار وليست إصدار إنتاج بمفتاح توقيع دائم.\n' >> dist/RELEASE_NOTES.md
@@ -98,7 +98,7 @@ jobs:
             --notes-file dist/RELEASE_NOTES.md --prerelease
   android-runtime:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -107,18 +107,33 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.0'
+          flutter-version: '3.32.8'
           channel: stable
           cache: true
       - name: Enable Android emulator acceleration
         run: sudo chmod a+rw /dev/kvm
       - name: Run on Android 13 and launch distributable APK
+        env:
+          ACCOUNTING_RUNTIME_REPORT_DIR: ${{ github.workspace }}/reports/android-runtime/api-33
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: bash tools/android-runtime-check.sh
+      - name: Test Android 5.0 and install the same distributable APK
+        env:
+          ACCOUNTING_RUNTIME_REPORT_DIR: ${{ github.workspace }}/reports/android-runtime/api-21
+          ACCOUNTING_ANDROID_PREBUILT_APK: ${{ github.workspace }}/dist/Accounting-System-Android.apk
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 21
+          target: default
+          arch: x86_64
+          profile: Nexus 5
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: bash tools/android-runtime-check.sh

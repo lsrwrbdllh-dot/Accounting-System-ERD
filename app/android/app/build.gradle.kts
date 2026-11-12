@@ -14,7 +14,7 @@ android {
     kotlinOptions { jvmTarget = JavaVersion.VERSION_17.toString() }
     defaultConfig {
         applicationId = "com.accounting.system"
-        minSdk = 23
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -31,9 +31,9 @@ android {
         release {
             // Install the shared preview beside older diagnostic builds. Never
             // require deleting a previous installation or its accounting data.
-            applicationIdSuffix = ".preview"
+            applicationIdSuffix = ".preview21"
             versionNameSuffix = "-preview"
-            manifestPlaceholders["appLabel"] = "النظام المحاسبي - تجربة"
+            manifestPlaceholders["appLabel"] = "النظام المحاسبي - تجربة 5+"
             signingConfig = signingConfigs.getByName("debug")
         }
     }

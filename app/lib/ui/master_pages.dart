@@ -35,9 +35,9 @@ Future<void> editMaster(BuildContext context,AccountingRepository repo,bool acco
   var busy=false;
   await showControllerDialog<void>(context:context,controllers:[name,code,barcode],builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:Text(account?'بيانات الحساب':'بيانات الصنف'),content:SingleChildScrollView(child:SizedBox(width:440,child:Form(key:form,child:Column(mainAxisSize:MainAxisSize.min,children:[
     formField(code,'الرمز'),formField(name,'الاسم'),
-    DropdownButtonFormField<String>(initialValue:type,decoration:const InputDecoration(labelText:'النوع'),items:[DropdownMenuItem(value:group,child:const Text('تجميعي / مجموعة')),DropdownMenuItem(value:leaf,child:const Text('تفصيلي'))],onChanged:(v)=>setLocal(()=>type=v!)),
+    DropdownButtonFormField<String>(value:type,decoration:const InputDecoration(labelText:'النوع'),items:[DropdownMenuItem(value:group,child:const Text('تجميعي / مجموعة')),DropdownMenuItem(value:leaf,child:const Text('تفصيلي'))],onChanged:(v)=>setLocal(()=>type=v!)),
     idDropdown(label:'الأب',rows:records.where((r)=>r[typeKey]==group&&r[key]!=row?[key]).toList(),idKey:key,nameKey:account?'AccountName':'ItemName',value:parent,onChanged:(v)=>setLocal(()=>parent=v??0),optional:true),
-    if(account)DropdownButtonFormField<String>(initialValue:normal,decoration:const InputDecoration(labelText:'طبيعة الرصيد'),items:const[DropdownMenuItem(value:'Debit',child:Text('مدين')),DropdownMenuItem(value:'Credit',child:Text('دائن'))],onChanged:(v)=>setLocal(()=>normal=v!)),
+    if(account)DropdownButtonFormField<String>(value:normal,decoration:const InputDecoration(labelText:'طبيعة الرصيد'),items:const[DropdownMenuItem(value:'Debit',child:Text('مدين')),DropdownMenuItem(value:'Credit',child:Text('دائن'))],onChanged:(v)=>setLocal(()=>normal=v!)),
     if(!account)formField(barcode,'باركود (اختياري)',mandatory:false),
     if(!account&&row==null&&type==leaf)idDropdown(label:'الوحدة الأساسية',rows:units,idKey:'UnitId',nameKey:'UnitName',value:baseUnit,onChanged:(v)=>setLocal(()=>baseUnit=v!)),
   ])))) ,actions:[TextButton(onPressed:busy?null:()=>Navigator.pop(dialog),child:const Text('إلغاء')),FilledButton(onPressed:busy?null:() async {
