@@ -20,6 +20,13 @@ Future<void> waitFor(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> reveal(WidgetTester tester, Finder finder) async {
+  // ListView builds children lazily. Older devices may keep a button outside
+  // the built viewport, so ensureVisible alone cannot find its element.
+  await tester.scrollUntilVisible(finder,200,scrollable:find.byType(Scrollable).first,maxScrolls:30);
+  await tester.pumpAndSettle();
+}
+
 void main(){
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets('Android sqflite create/read/edit/post and reopen',(tester)async{
@@ -64,9 +71,8 @@ void main(){
       await tester.tap(find.text('فواتير المشتريات'));
       await waitFor(tester,find.byType(FloatingActionButton));
       await tester.tap(find.byType(FloatingActionButton));
-      await waitFor(tester,find.text('إضافة صنف'));
-      await tester.ensureVisible(find.text('إضافة صنف'));
-      await tester.pumpAndSettle();
+      await waitFor(tester,find.text('فواتير المشتريات · مسودة'));
+      await reveal(tester,find.text('إضافة صنف'));
       await tester.tap(find.text('إضافة صنف'));
       await waitFor(tester,find.text('تفاصيل الصنف'));
       final quantity=find.widgetWithText(TextFormField,'الكمية');
@@ -79,8 +85,7 @@ void main(){
       await tester.enterText(price,'10');
       await tester.tap(find.text('اعتماد السطر'));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('حفظ المسودة'));
-      await tester.pumpAndSettle();
+      await reveal(tester,find.text('حفظ المسودة'));
       await tester.tap(find.text('حفظ المسودة'));
       await waitFor(tester,find.textContaining('فاتورة 1'));
       expect((await repo.invoices(1)).single['Total'],2000);
@@ -94,9 +99,8 @@ void main(){
       expect(await db.db.rawQuery('PRAGMA foreign_key_check'),isEmpty);
 
       await tester.tap(find.byType(BackButton).first);
-      await waitFor(tester,find.text('المخزون'));
-      await tester.ensureVisible(find.text('المخزون'));
-      await tester.pumpAndSettle();
+      await waitFor(tester,find.text('النظام المحاسبي'));
+      await reveal(tester,find.text('المخزون'));
       await tester.tap(find.text('المخزون'));
       await waitFor(tester,find.textContaining('حليب'));
       expect(find.textContaining('2.000'),findsOneWidget);
