@@ -42,7 +42,8 @@ class AppDatabase {
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys=ON');
         await db.execute('PRAGMA recursive_triggers=ON');
-        await db.execute('PRAGMA busy_timeout=10000');
+        // sqflite's Android onConfigure disallows PRAGMA queries returning rows.
+        // Do not issue busy_timeout here; transaction serialization is managed by sqflite.
       },
       onCreate: (db, version) => apply(db, 0, version),
       onUpgrade: apply,
