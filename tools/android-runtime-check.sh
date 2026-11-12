@@ -3,7 +3,7 @@ set -euo pipefail
 
 accounting_repo_root="${GITHUB_WORKSPACE:-$(pwd)}"
 runtime_report_dir="$accounting_repo_root/reports/android-runtime"
-runtime_package="${ACCOUNTING_ANDROID_PACKAGE:-com.accounting.system}"
+runtime_package="${ACCOUNTING_ANDROID_PACKAGE:-com.accounting.system.diagnostic}"
 mkdir -p "$runtime_report_dir"
 
 capture_runtime_evidence() {
