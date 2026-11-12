@@ -45,8 +45,8 @@ class _InvoiceEditorState extends State<InvoiceEditor>{
   @override void dispose(){date.dispose();notes.dispose();super.dispose();}
   Future<void> addParty()async{
     final controller=TextEditingController();
-    final name=await showDialog<String>(context:context,builder:(c)=>AlertDialog(title:Text(purchase?'إضافة مورد':'إضافة عميل'),content:TextField(controller:controller,decoration:const InputDecoration(labelText:'الاسم')),actions:[TextButton(onPressed:()=>Navigator.pop(c),child:const Text('إلغاء')),FilledButton(onPressed:()=>Navigator.pop(c,controller.text),child:const Text('إضافة'))]));
-    controller.dispose();if(name==null){return;}
+    final name=await showControllerDialog<String>(context:context,controllers:[controller],builder:(c)=>AlertDialog(title:Text(purchase?'إضافة مورد':'إضافة عميل'),content:TextField(controller:controller,decoration:const InputDecoration(labelText:'الاسم')),actions:[TextButton(onPressed:()=>Navigator.pop(c),child:const Text('إلغاء')),FilledButton(onPressed:()=>Navigator.pop(c,controller.text),child:const Text('إضافة'))]));
+    if(name==null){return;}
     try{final key=await widget.repository.addParty(purchase,name);final updated=await widget.repository.lookup(purchase?'Suppliers':'Customers');if(mounted){setState((){party=key;parties=updated;});}}catch(e){if(mounted){showError(context,e);}}
   }
   Future<void> addLine({int? index})async{
@@ -102,18 +102,18 @@ Future<DbRow?> invoiceLineDialog(BuildContext context,AccountingRepository repo,
   final discount=TextEditingController(text:formatFixed(existing?['Discount'] as int? ?? 0));
   final tax=TextEditingController(text:formatFixed(existing?['Tax'] as int? ?? 0));
   final form=GlobalKey<FormState>();bool loading=false;
-  final result=await showDialog<DbRow>(context:context,builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:const Text('تفاصيل الصنف'),content:SingleChildScrollView(child:Form(key:form,child:Column(mainAxisSize:MainAxisSize.min,children:[
+  final result=await showControllerDialog<DbRow>(context:context,controllers:[qty,price,discount,tax],builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:const Text('تفاصيل الصنف'),content:SingleChildScrollView(child:Form(key:form,child:Column(mainAxisSize:MainAxisSize.min,children:[
     idDropdown(label:'الصنف',rows:items,idKey:'ItemId',nameKey:'ItemName',value:itemId,onChanged:(v)async{if(v==null){return;}setLocal(()=>loading=true);final loaded=await repo.itemUnits(v);if(dialog.mounted){setLocal((){itemId=v;units=loaded;unit=units.isEmpty?null:units.first['ItemUnitId'] as int;loading=false;});}}),
     if(loading)const LinearProgressIndicator()else idDropdown(label:'الوحدة',rows:units,idKey:'ItemUnitId',nameKey:'UnitName',value:unit,onChanged:(v)=>setLocal(()=>unit=v)),
     formField(qty,'الكمية',numeric:true),formField(price,'سعر الوحدة',numeric:true),formField(discount,'الخصم (مبلغ)',numeric:true),formField(tax,'الضريبة (مبلغ)',numeric:true),
   ]))),actions:[TextButton(onPressed:()=>Navigator.pop(dialog),child:const Text('إلغاء')),FilledButton(onPressed:loading?null:(){try{if(!form.currentState!.validate()){return;}if(unit==null){throw const FormatException('اختر الوحدة');}final q=parseFixed(qty.text,3);if(q==0){throw const FormatException('الكمية يجب أن تكون موجبة');}Navigator.pop(dialog,<String,Object?>{'ItemId':itemId,'ItemUnitId':unit,'Qty':q,'Price':parseFixed(price.text,2),'Discount':parseFixed(discount.text,2),'Tax':parseFixed(tax.text,2),'BatchId':existing?['BatchId'],'ItemName':items.firstWhere((r)=>r['ItemId']==itemId)['ItemName'],'UnitName':units.firstWhere((r)=>r['ItemUnitId']==unit)['UnitName']});}catch(e){showError(dialog,e);}},child:const Text('اعتماد السطر'))])));
-  qty.dispose();price.dispose();discount.dispose();tax.dispose();return result;
+  return result;
 }
 
 Future<DbRow?> returnLineDialog(BuildContext context,List<DbRow> source,{DbRow? existing})async{
   if(source.isEmpty){throw const FormatException('الفاتورة الأصلية لا تحتوي أسطرًا');}
   var selected=existing?['OriginalLineNo'] as int? ?? source.first['LineNo'] as int;
   final qty=TextEditingController(text:formatFixed(existing?['Qty'] as int? ?? 1000,3));
-  final result=await showDialog<DbRow>(context:context,builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:const Text('الصنف المرتجع'),content:Column(mainAxisSize:MainAxisSize.min,children:[idDropdown(label:'سطر الفاتورة الأصلية',rows:source,idKey:'LineNo',nameKey:'ItemName',value:selected,onChanged:(v)=>setLocal(()=>selected=v!)),formField(qty,'الكمية المرتجعة',numeric:true)]),actions:[TextButton(onPressed:()=>Navigator.pop(dialog),child:const Text('إلغاء')),FilledButton(onPressed:(){try{final original=source.firstWhere((r)=>r['LineNo']==selected);final q=parseFixed(qty.text,3);if(q==0){throw const FormatException('الكمية يجب أن تكون موجبة');}Navigator.pop(dialog,<String,Object?>{'ItemId':original['ItemId'],'ItemUnitId':original['ItemUnitId'],'BatchId':original['BatchId'],'Qty':q,'Price':original['Price'],'OriginalLineNo':selected,'ItemName':original['ItemName'],'UnitName':original['UnitName']});}catch(e){showError(dialog,e);}},child:const Text('اعتماد السطر'))])));
-  qty.dispose();return result;
+  final result=await showControllerDialog<DbRow>(context:context,controllers:[qty],builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:const Text('الصنف المرتجع'),content:Column(mainAxisSize:MainAxisSize.min,children:[idDropdown(label:'سطر الفاتورة الأصلية',rows:source,idKey:'LineNo',nameKey:'ItemName',value:selected,onChanged:(v)=>setLocal(()=>selected=v!)),formField(qty,'الكمية المرتجعة',numeric:true)]),actions:[TextButton(onPressed:()=>Navigator.pop(dialog),child:const Text('إلغاء')),FilledButton(onPressed:(){try{final original=source.firstWhere((r)=>r['LineNo']==selected);final q=parseFixed(qty.text,3);if(q==0){throw const FormatException('الكمية يجب أن تكون موجبة');}Navigator.pop(dialog,<String,Object?>{'ItemId':original['ItemId'],'ItemUnitId':original['ItemUnitId'],'BatchId':original['BatchId'],'Qty':q,'Price':original['Price'],'OriginalLineNo':selected,'ItemName':original['ItemName'],'UnitName':original['UnitName']});}catch(e){showError(dialog,e);}},child:const Text('اعتماد السطر'))])));
+  return result;
 }

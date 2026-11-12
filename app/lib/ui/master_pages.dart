@@ -33,7 +33,7 @@ Future<void> editMaster(BuildContext context,AccountingRepository repo,bool acco
   var baseUnit=units.isEmpty?1:units.first['UnitId'] as int;
   final form=GlobalKey<FormState>();
   var busy=false;
-  await showDialog<void>(context:context,builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:Text(account?'بيانات الحساب':'بيانات الصنف'),content:SingleChildScrollView(child:SizedBox(width:440,child:Form(key:form,child:Column(mainAxisSize:MainAxisSize.min,children:[
+  await showControllerDialog<void>(context:context,controllers:[name,code,barcode],builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:Text(account?'بيانات الحساب':'بيانات الصنف'),content:SingleChildScrollView(child:SizedBox(width:440,child:Form(key:form,child:Column(mainAxisSize:MainAxisSize.min,children:[
     formField(code,'الرمز'),formField(name,'الاسم'),
     DropdownButtonFormField<String>(initialValue:type,decoration:const InputDecoration(labelText:'النوع'),items:[DropdownMenuItem(value:group,child:const Text('تجميعي / مجموعة')),DropdownMenuItem(value:leaf,child:const Text('تفصيلي'))],onChanged:(v)=>setLocal(()=>type=v!)),
     idDropdown(label:'الأب',rows:records.where((r)=>r[typeKey]==group&&r[key]!=row?[key]).toList(),idKey:key,nameKey:account?'AccountName':'ItemName',value:parent,onChanged:(v)=>setLocal(()=>parent=v??0),optional:true),
@@ -50,7 +50,6 @@ Future<void> editMaster(BuildContext context,AccountingRepository repo,bool acco
       if(dialog.mounted){Navigator.pop(dialog);}
     }catch(e){if(dialog.mounted){showError(dialog,e);setLocal(()=>busy=false);}}
   },child:const Text('حفظ'))])));
-  name.dispose();code.dispose();barcode.dispose();
 }
 
 class ItemDetail extends StatefulWidget {
@@ -66,8 +65,8 @@ class _ItemDetailState extends State<ItemDetail>{
     final all=await widget.repository.lookup('Units');
     if(!mounted){return;}
     final pack=TextEditingController(text:'1');int? selected;
-    await showDialog<void>(context:context,builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:const Text('إضافة وحدة للصنف'),content:Column(mainAxisSize:MainAxisSize.min,children:[idDropdown(label:'الوحدة',rows:all,idKey:'UnitId',nameKey:'UnitName',value:selected,onChanged:(v)=>setLocal(()=>selected=v)),formField(pack,'عدد الوحدات الأساسية',numeric:true)]),actions:[TextButton(onPressed:()=>Navigator.pop(dialog),child:const Text('إلغاء')),FilledButton(onPressed:()async{try{if(selected==null){throw const FormatException('اختر الوحدة');}await widget.repository.addItemUnit(widget.row['ItemId'] as int,selected!,parseFixed(pack.text,3));if(dialog.mounted){Navigator.pop(dialog);}}catch(e){if(dialog.mounted){showError(dialog,e);}}},child:const Text('حفظ'))])));
-    pack.dispose();if(mounted){setState(load);}
+    await showControllerDialog<void>(context:context,controllers:[pack],builder:(dialog)=>StatefulBuilder(builder:(dialog,setLocal)=>AlertDialog(title:const Text('إضافة وحدة للصنف'),content:Column(mainAxisSize:MainAxisSize.min,children:[idDropdown(label:'الوحدة',rows:all,idKey:'UnitId',nameKey:'UnitName',value:selected,onChanged:(v)=>setLocal(()=>selected=v)),formField(pack,'عدد الوحدات الأساسية',numeric:true)]),actions:[TextButton(onPressed:()=>Navigator.pop(dialog),child:const Text('إلغاء')),FilledButton(onPressed:()async{try{if(selected==null){throw const FormatException('اختر الوحدة');}await widget.repository.addItemUnit(widget.row['ItemId'] as int,selected!,parseFixed(pack.text,3));if(dialog.mounted){Navigator.pop(dialog);}}catch(e){if(dialog.mounted){showError(dialog,e);}}},child:const Text('حفظ'))])));
+    if(mounted){setState(load);}
   }
   @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text('${widget.row['ItemName']}'),actions:[IconButton(tooltip:'تعديل',icon:const Icon(Icons.edit),onPressed:()async{await editMaster(context,widget.repository,false,row:widget.row);if(context.mounted){Navigator.pop(context);}})]),floatingActionButton:widget.row['ItemType']=='Group'?null:FloatingActionButton(onPressed:addUnit,tooltip:'إضافة وحدة',child:const Icon(Icons.add)),body:FutureBuilder<List<DbRow>>(future:units,builder:(context,snapshot){if(snapshot.hasError){return Center(child:Text(errorMessage(snapshot.error!)));}if(!snapshot.hasData){return const Center(child:CircularProgressIndicator());}return ListView(children:[const ListTile(title:Text('وحدات الصنف')),for(final unit in snapshot.data!)ListTile(title:Text('${unit['UnitName']}'),subtitle:Text('${formatFixed(unit['PackingQty'] as int,3)} وحدة أساسية ${unit['IsBase']==1?'· الأساسية':''}'))]);}));
 }

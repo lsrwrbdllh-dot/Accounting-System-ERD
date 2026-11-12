@@ -5,6 +5,7 @@ import 'package:accounting_system/data/app_database.dart';
 import 'package:accounting_system/data/accounting_repository.dart';
 import 'package:accounting_system/main.dart';
 import 'package:accounting_system/ui/home_page.dart';
+import 'package:accounting_system/ui/invoice_pages.dart';
 
 void main(){
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,34 @@ void main(){
     expect(tester.takeException(),isNull);
     expect(find.text('النظام المحاسبي'),findsOneWidget);
     expect(find.textContaining('الصندوق 0.00'),findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+  testWidgets('Purchase input dialog closes safely and saves a real draft',(tester)async{
+    final repo=AccountingRepository(db)..userId=1;
+    await tester.pumpWidget(MaterialApp(home:InvoicesPage(repo,purchase:true)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('إضافة صنف'));
+    await tester.tap(find.text('إضافة صنف'));
+    await tester.pumpAndSettle();
+    final quantity=find.widgetWithText(TextFormField,'الكمية');
+    final price=find.widgetWithText(TextFormField,'سعر الوحدة');
+    await tester.ensureVisible(quantity);
+    await tester.enterText(quantity,'2');
+    await tester.ensureVisible(price);
+    await tester.enterText(price,'10');
+    await tester.tap(find.text('اعتماد السطر'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(),isNull);
+    await tester.ensureVisible(find.text('حفظ المسودة'));
+    await tester.tap(find.text('حفظ المسودة'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(),isNull);
+    final draft=(await repo.invoices(1)).single;
+    expect(draft['Total'],2000);
+    expect(draft['Status'],'Draft');
+    expect((await repo.invoiceLines(draft['TransId'] as int,1)).single['Qty'],2000);
     await tester.pumpWidget(const SizedBox());
   });
 }

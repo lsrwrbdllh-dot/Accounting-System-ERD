@@ -64,6 +64,19 @@ class _DataListPageState extends State<DataListPage> {
 
 Future<T?> openPage<T>(BuildContext context,Widget page)=>Navigator.of(context).push<T>(MaterialPageRoute(builder:(_)=>page));
 
+Future<T?> showControllerDialog<T>({required BuildContext context,required List<TextEditingController> controllers,required WidgetBuilder builder}) async {
+  final navigator=Navigator.of(context,rootNavigator:true);
+  final route=DialogRoute<T>(context:context,builder:builder,themes:InheritedTheme.capture(from:context,to:navigator.context));
+  try {
+    return await navigator.push<T>(route);
+  } finally {
+    // Navigator.pop completes before the dialog's exit animation. Keep input
+    // controllers alive until its overlay and editable fields are removed.
+    await route.completed;
+    for(final controller in controllers){controller.dispose();}
+  }
+}
+
 Widget formField(TextEditingController controller,String label,{bool numeric=false,bool mandatory=true,bool readOnly=false})=>Padding(padding:const EdgeInsets.only(bottom:12),child:TextFormField(controller:controller,readOnly:readOnly,decoration:InputDecoration(labelText:label),keyboardType:numeric?const TextInputType.numberWithOptions(decimal:true):TextInputType.text,validator:mandatory?(v)=>(v==null||v.trim().isEmpty)?'الحقل مطلوب':null:null));
 
 DropdownButtonFormField<int> idDropdown({required String label,required List<DbRow> rows,required String idKey,required String nameKey,required int? value,required ValueChanged<int?> onChanged,bool optional=false})=>DropdownButtonFormField<int>(initialValue:value,isExpanded:true,decoration:InputDecoration(labelText:label),items:[if(optional)const DropdownMenuItem<int>(value:0,child:Text('بدون')),for(final row in rows)DropdownMenuItem<int>(value:row[idKey] as int,child:Text('${row[nameKey]}',overflow:TextOverflow.ellipsis))],onChanged:onChanged,validator:optional?null:(v)=>v==null?'اختر قيمة':null);
