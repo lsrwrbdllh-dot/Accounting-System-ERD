@@ -18,6 +18,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["appLabel"] = "النظام المحاسبي"
     }
     buildTypes {
         // CI debug APKs use runner-specific signing keys. Keep them separate from
@@ -25,8 +26,16 @@ android {
         getByName("debug") {
             applicationIdSuffix = ".diagnostic"
             versionNameSuffix = "-diagnostic"
+            manifestPlaceholders["appLabel"] = "النظام المحاسبي - فحص"
         }
-        release { signingConfig = signingConfigs.getByName("debug") }
+        release {
+            // Install the shared preview beside older diagnostic builds. Never
+            // require deleting a previous installation or its accounting data.
+            applicationIdSuffix = ".preview"
+            versionNameSuffix = "-preview"
+            manifestPlaceholders["appLabel"] = "النظام المحاسبي - تجربة"
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 }
 flutter { source = "../.." }

@@ -17,7 +17,17 @@ class _AccountingAppState extends State<AccountingApp>{
   late Future<AccountingRepository> ready;
   bool signedIn=false;
   @override void initState(){super.initState();ready=initialize();}
-  Future<AccountingRepository> initialize()async=>widget.repository??AccountingRepository(await AppDatabase.open(demo:const String.fromEnvironment('APP_ENV',defaultValue:'production')=='demo'));
+  Future<AccountingRepository> initialize() async {
+    try {
+      return widget.repository ?? AccountingRepository(await AppDatabase.open(
+        demo:const String.fromEnvironment('APP_ENV',defaultValue:'production')=='demo',
+      ));
+    } catch (error) {
+      // Keep a non-sensitive marker for device startup checks, including release.
+      debugPrint('ACCOUNTING_STARTUP_FAILURE ${error.runtimeType}');
+      rethrow;
+    }
+  }
   @override Widget build(BuildContext context)=>MaterialApp(debugShowCheckedModeBanner:false,title:'النظام المحاسبي',locale:const Locale('ar'),supportedLocales:const[Locale('ar')],localizationsDelegates:GlobalMaterialLocalizations.delegates,theme:ThemeData(useMaterial3:true,colorScheme:ColorScheme.fromSeed(seedColor:const Color(0xff115e59)),inputDecorationTheme:const InputDecorationTheme(border:OutlineInputBorder()),appBarTheme:const AppBarTheme(centerTitle:false)),home:FutureBuilder<AccountingRepository>(future:ready,builder:(context,snapshot){
     if(snapshot.hasError){
       assert(() {
@@ -25,12 +35,12 @@ class _AccountingAppState extends State<AccountingApp>{
         debugPrintStack(stackTrace: snapshot.stackTrace);
         return true;
       }());
-      return Scaffold(body:Center(child:Padding(padding:const EdgeInsets.all(24),child:SingleChildScrollView(child:Text(
+      return Scaffold(body:Center(child:Padding(padding:const EdgeInsets.all(24),child:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,children:[Text(
         kDebugMode
           ? 'تعذر بدء تشغيل النظام.\n\nتفاصيل التشخيص (نسخة التطوير):\n${snapshot.error}'
           : errorMessage(snapshot.error!),
         textDirection:TextDirection.rtl,
-      )))));
+      ),const SizedBox(height:16),FilledButton(onPressed:(){setState(()=>ready=initialize());},child:const Text('إعادة المحاولة'))])))));
     }
     if(!snapshot.hasData){return const Scaffold(body:Center(child:CircularProgressIndicator()));}
     final repo=snapshot.data!;

@@ -68,7 +68,7 @@ jobs:
           path: app/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
   publish-apk:
-    needs: flutter
+    needs: [flutter, sqlite, android-runtime]
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     permissions:
@@ -76,21 +76,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          name: android-debug-apk
-          path: app/apk
-      - name: Save installable APK inside the app directory
+          name: android-release-apk
+          path: dist
+      - name: Publish the APK as a direct Release download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: android-preview-${{ github.run_number }}-${{ github.sha }}
         run: |
-          test -s app/apk/app-debug.apk
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -f app/apk/app-debug.apk
-          if ! git diff --cached --quiet; then
-            git commit -m 'Store latest diagnostic Android APK [skip ci]'
-            git push origin HEAD:${{ github.ref_name }}
-          fi
+          test -s dist/Accounting-System-Android.apk
+          printf 'نسخة تجربة موقعة للاختبار، مبنية من %s.\n\n' "$GITHUB_SHA" > dist/RELEASE_NOTES.md
+          printf 'نجح التحليل والاختبارات والتثبيت والتشغيل على محاكي Android 13.\n' >> dist/RELEASE_NOTES.md
+          printf 'نزّل ملف APK نفسه؛ لا تغيّر امتداد ملف ZIP إلى APK.\n' >> dist/RELEASE_NOTES.md
+          printf 'المستخدم: demo، كلمة المرور: Demo@2026!\n\n' >> dist/RELEASE_NOTES.md
+          printf 'هذه نسخة Preview بتوقيع اختبار وليست إصدار إنتاج بمفتاح توقيع دائم.\n' >> dist/RELEASE_NOTES.md
+          gh release create "$RELEASE_TAG" dist/Accounting-System-Android.apk dist/SHA256SUMS \
+            --target "$GITHUB_SHA" --title 'النظام المحاسبي — نسخة Android تجريبية' \
+            --notes-file dist/RELEASE_NOTES.md --prerelease
   android-runtime:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -123,9 +128,11 @@ jobs:
         with:
           name: android-runtime-evidence
           path: reports/android-runtime/
-      - name: Upload APK launched on Android
+      - name: Upload the signed release APK launched on Android
         uses: actions/upload-artifact@v4
         with:
-          name: android-runtime-tested-apk
-          path: app/build/app/outputs/flutter-apk/app-debug.apk
+          name: android-release-apk
+          path: |
+            dist/Accounting-System-Android.apk
+            dist/SHA256SUMS
           if-no-files-found: error
