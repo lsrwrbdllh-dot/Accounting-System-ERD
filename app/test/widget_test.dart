@@ -8,8 +8,14 @@ import 'package:accounting_system/main.dart';
 void main(){
   TestWidgetsFlutterBinding.ensureInitialized();
   sqfliteFfiInit();
+  late AppDatabase db;
+  setUp(() async {
+    // Prepare real SQLite outside the widget test's fake clock. In-process FFI
+    // avoids waiting on isolate messages while fake async is being pumped.
+    db=await AppDatabase.open(demo:true,filePath:inMemoryDatabasePath,factory:databaseFactoryFfiNoIsolate);
+  });
+  tearDown(() async { await db.close(); });
   testWidgets('Arabic login uses the real database', (tester)async{
-    final db=await AppDatabase.open(demo:true,filePath:inMemoryDatabasePath,factory:databaseFactoryFfi);
     await tester.pumpWidget(AccountingApp(repository:AccountingRepository(db)));
     await tester.pumpAndSettle();
     expect(find.text('تسجيل الدخول'),findsOneWidget);
@@ -17,6 +23,5 @@ void main(){
     await tester.enterText(find.byType(TextFormField).first,'demo');
     expect(await db.db.query('Trans'),isEmpty);
     await tester.pumpWidget(const SizedBox());
-    await db.close();
   });
 }
