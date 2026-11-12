@@ -14,7 +14,7 @@ class HomePage extends StatefulWidget{
 class _HomePageState extends State<HomePage>{
   late Future<DbRow> summary;
   @override void initState(){super.initState();summary=widget.repository.summary();}
-  Future<void> navigate(Widget page)async{await openPage<void>(context,page);if(mounted){setState(()=>summary=widget.repository.summary());}}
+  Future<void> navigate(Widget page)async{await openPage<void>(context,page);if(mounted){setState((){summary=widget.repository.summary();});}}
   @override Widget build(BuildContext context){
     final repo=widget.repository;
     final destinations=<({String name,IconData icon,Widget page})>[

@@ -40,7 +40,7 @@ class _AccountingAppState extends State<AccountingApp>{
           ? 'تعذر بدء تشغيل النظام.\n\nتفاصيل التشخيص (نسخة التطوير):\n${snapshot.error}'
           : errorMessage(snapshot.error!),
         textDirection:TextDirection.rtl,
-      ),const SizedBox(height:16),FilledButton(onPressed:(){setState(()=>ready=initialize());},child:const Text('إعادة المحاولة'))])))));
+      ),const SizedBox(height:16),FilledButton(onPressed:(){setState((){ready=initialize();});},child:const Text('إعادة المحاولة'))])))));
     }
     if(!snapshot.hasData){return const Scaffold(body:Center(child:CircularProgressIndicator()));}
     final repo=snapshot.data!;

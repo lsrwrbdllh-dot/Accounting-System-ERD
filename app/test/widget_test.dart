@@ -4,6 +4,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:accounting_system/data/app_database.dart';
 import 'package:accounting_system/data/accounting_repository.dart';
 import 'package:accounting_system/main.dart';
+import 'package:accounting_system/ui/home_page.dart';
 
 void main(){
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,20 @@ void main(){
     expect(find.byType(TextFormField),findsNWidgets(2));
     await tester.enterText(find.byType(TextFormField).first,'demo');
     expect(await db.db.query('Trans'),isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+  testWidgets('Returning from a directory refreshes home without async setState',(tester)async{
+    final repo=AccountingRepository(db)..userId=1;
+    await tester.pumpWidget(MaterialApp(home:HomePage(repo,onLogout:(){})));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('دليل الأصناف'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('حليب'),findsOneWidget);
+    await tester.tap(find.byType(BackButton).first);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(),isNull);
+    expect(find.text('النظام المحاسبي'),findsOneWidget);
+    expect(find.textContaining('الصندوق 0.00'),findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }
