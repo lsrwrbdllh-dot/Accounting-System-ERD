@@ -8,7 +8,7 @@ permissions:
   contents: read
 defaults:
   run:
-    shell: bash
+    shell: bash --noprofile --norc -eo pipefail {0}
 jobs:
   sqlite:
     runs-on: ubuntu-latest
