@@ -20,6 +20,12 @@ android {
         versionName = flutter.versionName
     }
     buildTypes {
+        // CI debug APKs use runner-specific signing keys. Keep them separate from
+        // the installed production package so updates never fail on signature mismatch.
+        getByName("debug") {
+            applicationIdSuffix = ".diagnostic"
+            versionNameSuffix = "-diagnostic"
+        }
         release { signingConfig = signingConfigs.getByName("debug") }
     }
 }
