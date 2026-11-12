@@ -67,6 +67,30 @@ jobs:
           name: android-debug-apk
           path: app/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
+  publish-apk:
+    needs: flutter
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-debug-apk
+          path: app/apk
+      - name: Save installable APK inside the app directory
+        run: |
+          test -s app/apk/app-debug.apk
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f app/apk/app-debug.apk
+          if ! git diff --cached --quiet; then
+            git commit -m 'Store latest diagnostic Android APK [skip ci]'
+            git push origin HEAD:${{ github.ref_name }}
+          fi
   android-runtime:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
