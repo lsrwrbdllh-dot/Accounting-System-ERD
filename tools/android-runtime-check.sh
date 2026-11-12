@@ -25,13 +25,13 @@ flutter pub get
 timeout 480s flutter test integration_test/persistence_test.dart -d emulator-5554 --dart-define=APP_ENV=demo --reporter expanded 2>&1 | tee "$runtime_report_dir/integration.log"
 flutter build apk --release --target lib/main.dart --dart-define=APP_ENV=demo 2>&1 | tee "$runtime_report_dir/build.log"
 runtime_apk="$accounting_repo_root/app/build/app/outputs/flutter-apk/app-release.apk"
-runtime_apksigner="$(rg --files "$ANDROID_HOME/build-tools" -g apksigner | sort -V | tail -n 1)"
-runtime_aapt="$(rg --files "$ANDROID_HOME/build-tools" -g aapt | sort -V | tail -n 1)"
+runtime_apksigner="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+runtime_aapt="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
 "$runtime_apksigner" verify --verbose --print-certs "$runtime_apk" > "$runtime_report_dir/signature.txt"
 "$runtime_aapt" dump badging "$runtime_apk" > "$runtime_report_dir/apk-info.txt"
-rg -F "package: name='$runtime_package'" "$runtime_report_dir/apk-info.txt"
-rg -F "'arm64-v8a'" "$runtime_report_dir/apk-info.txt"
-if rg -q 'application-debuggable|application-testOnly' "$runtime_report_dir/apk-info.txt"; then
+grep -F "package: name='$runtime_package'" "$runtime_report_dir/apk-info.txt"
+grep -F "'arm64-v8a'" "$runtime_report_dir/apk-info.txt"
+if grep -Eq 'application-debuggable|application-testOnly' "$runtime_report_dir/apk-info.txt"; then
   echo 'The distributable must not be a debugger-only or test-only APK.' >&2
   exit 1
 fi
@@ -50,11 +50,11 @@ sleep 8
 adb shell pidof "$runtime_package" > "$runtime_report_dir/process.txt"
 adb logcat -d > "$runtime_report_dir/launch-logcat.txt"
 adb logcat -d -b crash > "$runtime_report_dir/launch-crashes.txt"
-if rg -q 'ACCOUNTING_STARTUP_FAILURE' "$runtime_report_dir/launch-logcat.txt"; then
+if grep -Eq 'ACCOUNTING_STARTUP_FAILURE' "$runtime_report_dir/launch-logcat.txt"; then
   echo 'Application reported a startup failure.' >&2
   exit 1
 fi
-if rg -Fq "Process: $runtime_package" "$runtime_report_dir/launch-crashes.txt"; then
+if grep -Fq "Process: $runtime_package" "$runtime_report_dir/launch-crashes.txt"; then
   echo 'Application crashed after launch.' >&2
   exit 1
 fi
