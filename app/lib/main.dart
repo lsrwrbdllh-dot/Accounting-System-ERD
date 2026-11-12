@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'data/app_database.dart';
 import 'data/accounting_repository.dart';
@@ -18,7 +19,19 @@ class _AccountingAppState extends State<AccountingApp>{
   @override void initState(){super.initState();ready=initialize();}
   Future<AccountingRepository> initialize()async=>widget.repository??AccountingRepository(await AppDatabase.open(demo:const String.fromEnvironment('APP_ENV',defaultValue:'production')=='demo'));
   @override Widget build(BuildContext context)=>MaterialApp(debugShowCheckedModeBanner:false,title:'النظام المحاسبي',locale:const Locale('ar'),supportedLocales:const[Locale('ar')],localizationsDelegates:GlobalMaterialLocalizations.delegates,theme:ThemeData(useMaterial3:true,colorScheme:ColorScheme.fromSeed(seedColor:const Color(0xff115e59)),inputDecorationTheme:const InputDecorationTheme(border:OutlineInputBorder()),appBarTheme:const AppBarTheme(centerTitle:false)),home:FutureBuilder<AccountingRepository>(future:ready,builder:(context,snapshot){
-    if(snapshot.hasError){return Scaffold(body:Center(child:Padding(padding:const EdgeInsets.all(24),child:Text(errorMessage(snapshot.error!)))));}
+    if(snapshot.hasError){
+      assert(() {
+        debugPrint('Startup database initialization failed: ${snapshot.error}');
+        debugPrintStack(stackTrace: snapshot.stackTrace);
+        return true;
+      }());
+      return Scaffold(body:Center(child:Padding(padding:const EdgeInsets.all(24),child:SingleChildScrollView(child:Text(
+        kDebugMode
+          ? 'تعذر بدء تشغيل النظام.\n\nتفاصيل التشخيص (نسخة التطوير):\n${snapshot.error}'
+          : errorMessage(snapshot.error!),
+        textDirection:TextDirection.rtl,
+      )))));
+    }
     if(!snapshot.hasData){return const Scaffold(body:Center(child:CircularProgressIndicator()));}
     final repo=snapshot.data!;
     if(signedIn){return HomePage(repo,onLogout:(){repo.logout();setState(()=>signedIn=false);});}
